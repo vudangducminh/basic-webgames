@@ -1,0 +1,12 @@
+#board-container{
+    display: flex;
+    justify-content: center;
+}
+
+#board{
+    display: grid;
+    grid-template-columns: repeat(10,1fr);
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+}
