@@ -1,3 +1,7 @@
+*{
+    box-sizing: border-box;
+}
+
 #board-container{
     display: flex;
     justify-content: center;
@@ -9,4 +13,35 @@
     align-items: center;
     justify-content: center;
     width: fit-content;
+}
+
+.site-content {
+    margin-top: 100px;
+    text-align: justify;
+    margin-left: 5%;
+    margin-right: 5%;
+    overflow: auto;
+}
+
+header{
+    height: 100px;
+    width: 100%;
+    position: fixed;
+    top: 0px;
+    background: fixed;
+    background-color: lightgray;
+}
+
+
+.menus {
+    text-align: center;
+}
+
+.menus div{
+    display: inline;
+}
+
+.menu-item{
+    margin-left: 5%;
+    margin-right: 5%;
 }
