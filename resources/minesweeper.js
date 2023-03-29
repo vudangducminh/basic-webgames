@@ -31,17 +31,13 @@ function init(){
             checkFF[i][j]=0;
         }
     }
-    for (var i=1;i<=10;i++){
-        while (bombSites.size <= prevLength){
-            var pos = randInt(100);
-            bombSites.add(pos);
-        }
-        prevLength++;
+
+    while (bombSites.size < 10){
+        var pos = randInt(100);
+        bombSites.add(pos);
     }
     
-    /*bombSites.forEach(pos => {
-        console.log(pos);
-    });*/
+    console.log(bombSites);
     for (var i=1;i<=10;i++){
         for (var j=1;j<=10;j++){
             var content = (randInt(100)).toString();
@@ -49,10 +45,11 @@ function init(){
             box.classList.add("board-button");
             box.classList.add("btn");
             box.classList.add("btn-outline-secondary");
-            box.setAttribute('listeningToClick', 'true');
+            box.listeningToClick = true;
             box.textContent = "?";
             box.positionX = i;
             box.positionY = j;
+            box.isFlagged = false;
             if(bombSites.has(10*i+j)){
                 box.hasBomb = true;
                 boardState[i][j] = -1;
@@ -100,6 +97,7 @@ function init(){
     let boardButtonsTemp = document.getElementsByClassName("board-button");
     for (var i=0; i<boardButtonsTemp.length; i++){
         boardButtonsTemp[i].addEventListener('click', changeText, false);
+        boardButtonsTemp[i].addEventListener('contextmenu', toggleFlag, true);
     }
 }
 init();
@@ -107,12 +105,12 @@ init();
 const boardButtons = document.getElementsByClassName("board-button");
 
 function floodFillReveal(x,y){
-    //console.log(x,y);
+    //
     if(x<1 || y<1 || x>10 || y>10) return;
-    if(checkFF[x][y] == 1) return;
+    if(checkFF[x][y] === 1) return;
     checkFF[x][y] = 1;
     tilesRemaining--;
-      
+    console.log(x,y,tilesRemaining);  
     boardButtons[(x-1)*10+(y-1)].textContent = boardState[x][y];
     
     if(boardState[x][y]!=0) return;
@@ -134,7 +132,7 @@ function changeText(){
         this.textContent = "X";
         gameOver(false);
     }
-    else if (state == 0){
+    else {
         floodFillReveal(this.positionX, this.positionY);
         //console.log(this.positionX,this.positionY,boardState[this.positionX][this.positionY]);
     }
@@ -145,12 +143,29 @@ function changeText(){
     
 }
 
+function toggleFlag(event){
+    event.preventDefault();
+    var state = boardState[this.positionX][this.positionY];
+    if(this.isFlagged===false){
+        this.textContent = "P";
+        this.removeEventListener('click',changeText);
+    }
+    else{
+        this.textContent = "?";
+        this.addEventListener('click', changeText, false);
+    }
+    this.isFlagged = !this.isFlagged;
+}
+
 function gameOver(win){
     for(var i=0;i<boardButtons.length;i++){
         //console.log(boardButtons[i]);
-        if(boardButtons[i].getAttribute('listeningToClick') === 'true'){
+        if(boardButtons[i].textContent === "?" && win===true){
+            floodFillReveal(boardButtons[i].positionX, boardButtons[i].positionY);
+        }
+        if(boardButtons[i].listeningToClick === true){
             boardButtons[i].removeEventListener('click', changeText);
-            boardButtons[i].setAttribute('listeningToClick', 'false');
+            boardButtons[i].listeningToClick = false;
         }
         if(boardButtons[i].hasBomb){
             boardButtons[i].textContent = "X";
@@ -159,7 +174,7 @@ function gameOver(win){
         }
 
     }
-    if (win){
+    if (win===true){
         alert("You won!");
     }
     else{
