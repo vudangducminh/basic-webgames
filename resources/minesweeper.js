@@ -42,8 +42,8 @@ function hash(i, j)
 
 function init()
 {	
+    stopTimer(board_info.timerID);
 	Object.assign(board_info, boardDefault);
-	console.log(boardDefault);
 	document.getElementById("EndGame").innerHTML="";
 	document.getElementById("timer").innerHTML = "⏲️: 0";
 	gameBoard.innerHTML = '';
@@ -284,6 +284,5 @@ function toggleEndGame()
 }
 
 window.addEventListener('load', function() {
-	stopTimer(board_info.timerID);
     init();
 });
