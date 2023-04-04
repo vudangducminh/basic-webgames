@@ -1,7 +1,7 @@
 const button = document.getElementById("button");
-const board = document.getElementById("board");
+const gameBoard = document.getElementById('MinesweeperBoard');
 
-var board_info =
+const boardDefault =
 {
 	cnt_row : 13,
 	cnt_col : 30,
@@ -9,36 +9,31 @@ var board_info =
 	bomb : '💣',
 	flag : '🚩',
 	dead : false,
+	opening: true,
+	timerID: -1,
 	colors : {1: 'blue', 2: 'green', 3: 'red', 4: 'purple', 5: 'maroon', 6: 'turquoise', 7: 'black', 8: 'grey'}
 };
 
-let state = new Array(board_info.cnt_row+1);
-for(var i=1; i<=board_info.cnt_row; i++)
-{
-	state[i] = new Array(board_info.cnt_col+1).fill(0);
-}
+var board_info = {};
+Object.assign(board_info, boardDefault);
 
-var cnt=0;
-var cntflag=0;
+let state;
+
+var cnt;
+var cntflag;
 
 function rng(l, r)
 {
 	return Math.floor(Math.random()*(r-l+1))+l;
 }
 
-let flag = new Array(board_info.cnt_col*board_info.cnt_row+1).fill(false);
+let flag;
 
-let clicked = new Array(board_info.cnt_row+1);
-for(var i=1; i<=board_info.cnt_row; i++)
-{
-	clicked[i] = new Array(board_info.cnt_col+1).fill(false);
-}
+let clicked;
 
-let rightflag = new Array(board_info.cnt_row+1);
-for(var i=1; i<=board_info.cnt_row; i++)
-{
-	rightflag[i] = new Array(board_info.cnt_col+1).fill(false);
-}
+let rightflag;
+
+let gameTime;
 
 function hash(i, j)
 {
@@ -46,7 +41,38 @@ function hash(i, j)
 }
 
 function init()
-{
+{	
+	Object.assign(board_info, boardDefault);
+	console.log(boardDefault);
+	document.getElementById("EndGame").innerHTML="";
+	document.getElementById("timer").innerHTML = "⏲️: 0";
+	gameBoard.innerHTML = '';
+	
+
+	cnt = 0;
+	cntflag = 0;
+	gameTime = 0;
+
+	state = new Array(board_info.cnt_row+1);
+	for(var i=1; i<=board_info.cnt_row; i++)
+	{
+		state[i] = new Array(board_info.cnt_col+1).fill(0);
+	}
+
+	flag = new Array(board_info.cnt_col*board_info.cnt_row+1).fill(false);
+
+	clicked  = new Array(board_info.cnt_row+1);
+	for(var i=1; i<=board_info.cnt_row; i++)
+	{
+		clicked[i] = new Array(board_info.cnt_col+1).fill(false);
+	}
+
+	rightflag  = new Array(board_info.cnt_row+1);
+	for(var i=1; i<=board_info.cnt_row; i++)
+	{
+		rightflag[i] = new Array(board_info.cnt_col+1).fill(false);
+	}
+
 	var bomb = new Set();
 	while(bomb.size < board_info.cnt_bomb)
 	{
@@ -70,7 +96,7 @@ function init()
         }
         table.appendChild(row);
     }
-    document.getElementById('MinesweeperBoard').appendChild(table);
+    gameBoard.appendChild(table);
     for(var i=1; i<=board_info.cnt_row; i++)
     {
     	for(var j=1; j<=board_info.cnt_col; j++)
@@ -95,10 +121,20 @@ function init()
     alertbomb();
 }
 
+function startTimer(){
+	board_info.timerID = setInterval(function(){
+		gameTime+=1;
+		document.getElementById("timer").innerHTML = "⏲️: " + gameTime;
+	},1000);
+}
+
+function stopTimer(id){
+	clearInterval(id);
+}
+
 function addCellListener(td, i, j)
 {
 	td.addEventListener('mousedown', function(event){
-        
         if(event.which==1) cell_click(this, i, j);
         if(board_info.dead==false) alertbomb();
     });
@@ -109,7 +145,7 @@ function addCellListener(td, i, j)
 
 function alertbomb()
 {
-	document.getElementById("EndGame").innerHTML=(board_info.cnt_bomb-cntflag) + " bombs left";
+	document.getElementById("flags").innerHTML="🚩:"+(board_info.cnt_bomb-cntflag);
 }
 
 function toggle_flag(event,cell, i, j)
@@ -197,6 +233,10 @@ function check_next(cell, i, j)
 
 function cell_click(cell, i, j)
 {
+	if(board_info.opening === true){
+		board_info.opening = false;
+		startTimer();
+	}
 	if(board_info.dead) return;
 	if(clicked[i][j]) check_next(cell, i, j);
 	else reveal(cell, i, j);
@@ -205,6 +245,7 @@ function cell_click(cell, i, j)
 
 function toggleEndGame()
 {
+	stopTimer(board_info.timerID);
 	cnt=0;
 	if(board_info.dead==false)
 	{
@@ -243,11 +284,6 @@ function toggleEndGame()
 }
 
 window.addEventListener('load', function() {
+	stopTimer(board_info.timerID);
     init();
 });
-
-function newgame()
-{
-	window.location.reload();
-	board_info.dead=false;
-}
