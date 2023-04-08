@@ -21,7 +21,7 @@ let state = new Array(board.row + 1);
 let reveal = new Array(board.row + 1);
 let start_board = new Array(board.row + 1);
 let valid = new Array(board.row + 1);
-var score = 0, min_reveal_number = 24, max_reveal_number = 38;
+var score = 0, min_hidden_number, max_hidden_number;
 
 for(var i = 1; i <= board.row; i++){
     state[i] = new Array(board.col + 1).fill(0);
@@ -35,10 +35,11 @@ for(var i = 1; i <= board.row; i++){
 
 function reset_all(mode){
     score = 0; 
-    if(mode == 3) mode = rng(0, 2);
-    if(mode == 0) min_reveal_number = 33, max_reveal_number = 38;
-    if(mode == 1) min_reveal_number = 28, max_reveal_number = 32;
-    if(mode == 2) min_reveal_number = 24, max_reveal_number = 27;
+    if(mode == 4) mode = rng(0, 3);
+    if(mode == 0) min_hidden_number = 36, max_hidden_number = 42;
+    if(mode == 1) min_hidden_number = 43, max_hidden_number = 47;
+    if(mode == 2) min_hidden_number = 48, max_hidden_number = 51;
+    if(mode == 3) min_hidden_number = 52, max_hidden_number = 54;
     for(var i = 1; i <= board.row; i++){
         for(var j = 1; j <= board.col; j++){
             state[i][j] = reveal[i][j] = start_board[i][j] = 0;
@@ -53,6 +54,14 @@ function Big_cell(x){
     return Math.floor((x - 1) / board.big_cell_size) + 1;
 }
 
+function is_filled(state){
+    for(var i = 1; i <= board.row; i++){
+        for(var j = 1; j <= board.col; j++){
+            if(!state[i][j]) return false;
+        }
+    }
+    return true;
+}
 function is_valid(state){
     for(var row = 1; row <= board.big_cell_size; row++){
         for(var col = 1; col <= board.big_cell_size; col++){
@@ -89,7 +98,7 @@ function is_valid(state){
 }
 
 
-function update_valid_number(row, col, number){
+function update_valid_number(valid, row, col, number){
     for(var i = 1; i <= board.num; i++){
         valid[i][col][number] = 0;
         valid[row][i][number] = 0;
@@ -101,6 +110,7 @@ function update_valid_number(row, col, number){
             valid[i][j][number] = 0;
         }
     }
+    return valid;
 }
 
 
@@ -162,20 +172,21 @@ function update_color(){
     }
 }
 
-function update_state(){
+function update_state(reveal){
+    let valid = new Array(board.row + 1);
     for(var i = 1; i <= board.row; i++){
+        valid[i] = new Array(board.col + 1);
         for(var j = 1; j <= board.col; j++){
-            for(var k = 1; k <= board.num; k++){
-                valid[i][j][k] = 1;
-            }
+            valid[i][j] = new Array(board.num + 1).fill(1);
         }
     }
     for(var i = 1; i <= board.row; i++){
         for(var j = 1; j <= board.col; j++){
             if(!reveal[i][j]) continue;
-            update_valid_number(i, j, reveal[i][j]);
+            valid = update_valid_number(valid, i, j, reveal[i][j]);
         }
     }
+    return valid;
 }
 
 function shuffle(array){
@@ -221,28 +232,71 @@ function GenerateBoard(cur_row, cur_col){
     return false;
 }
 
+function solve_sudoku(cur_board, valid_state){
+    if(is_valid(cur_board) == true && is_filled(cur_board)) return true;
+    var min_valid_state = 1000, row = 1, col = 1;
+    for(var i = 1; i <= board.row; i++){
+        for(var j = 1; j <= board.col; j++){
+            if(cur_board[i][j]) continue;
+            var count = 0;
+            for(var num = 1; num <= board.num; num++){
+                if(valid_state[i][j][num] == true) count++;
+            }
+            if(min_valid_state > count){
+                min_valid_state = count; 
+                row = i;
+                col = j; 
+            }
+        }
+    }
+    for(var num = 1; num <= board.num; num++){
+        if(valid_state[row][col][num] == false) continue;
+        cur_board[row][col] = num;
+        var flag = solve_sudoku(cur_board, update_state(cur_board));
+        cur_board[row][col] = 0;
+        if(flag == true) return true;
+    }
+    return false;
+}
 function Reveal_cell(){
-    // document.writeln(min_reveal_number);
-    // document.writeln(max_reveal_number);
-    var reveal_number = rng(min_reveal_number, max_reveal_number);
-    // document.writeln(reveal_number);
-    score = reveal_number;
+    var hidden_number = rng(min_hidden_number, max_hidden_number);
+    score = board.row * board.col - hidden_number;
     let arr = [];
     for(var i = 1; i <= board.row; i++){
         for(var j = 1; j <= board.col; j++){
             arr.push(hash(i, j));
+            let cell = document.getElementById(hash(i, j));
+            start_board[i][j] = reveal[i][j] = state[i][j];
+            cell.textContent = state[i][j];
+            cell.style.color = "black";
         }
     }
     arr = shuffle(arr);
-    for(var i = 0; i < reveal_number; i++){
+    var cnt = 0;
+    for(var i = 0; i < hidden_number; i++){
         let cell = document.getElementById(arr[i]);
         var cell_row = Math.floor((arr[i] - 1) / board.col) + 1, cell_col = arr[i] % board.col;
-        if(!cell_col) cell_col = board.col; 
-        start_board[cell_row][cell_col] = reveal[cell_row][cell_col] = state[cell_row][cell_col];
-        cell.textContent = reveal[cell_row][cell_col];
-        cell.style.color = "black";
-        update_valid_number(cell_row, cell_col, reveal[cell_row][cell_col]);
+        if(!cell_col) cell_col = board.col;
+        var flag = 0;
+        for(var num = 1; num <= board.num; num++){
+            if(state[cell_row][cell_col] == num) continue;
+            reveal[cell_row][cell_col] = num; 
+            valid = update_state(reveal);
+            if(solve_sudoku(reveal, valid) == true){
+                flag = 1; break;
+            }
+        }
+        if(flag == true){
+            start_board[cell_row][cell_col] = state[cell_row][cell_col];
+            reveal[cell_row][cell_col] = state[cell_row][cell_col];
+            hidden_number++; arr.push(arr[i]); continue;
+        }
+        start_board[cell_row][cell_col] = reveal[cell_row][cell_col] = 0;
+        cell.textContent = "";
+        cell.style.color = "";
+        cnt++;
     }
+    valid = update_state(reveal);
 }
 
 function fill(row, col, num){
@@ -253,7 +307,7 @@ function fill(row, col, num){
     cell.textContent = reveal[row][col];
     cell.style.color = "blue"; 
     update_color();
-    update_state(); 
+    valid = update_state(reveal); 
     for(var i = 1; i <= board.num; i++){
         valid[i][col][num] = 0;
         valid[row][i][num] = 0;
@@ -277,7 +331,7 @@ function erase(row, col){
     let cell = document.getElementById(hash(row, col));
     cell.textContent = "";
     cell.style.color = "";
-    update_state(); 
+    valid = update_state(reveal); 
 }
 
 function same_big_cell(i, j, x, y){
