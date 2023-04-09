@@ -136,7 +136,6 @@ function addCellListener(td, i, j)
 {
 	td.addEventListener('mousedown', function(event){
         if(event.which==1) cell_click(this, i, j);
-        if(board_info.dead==false) alertbomb();
     });
     td.addEventListener('contextmenu', function(event){
         toggle_flag(event, this, i, j);
@@ -165,6 +164,7 @@ function toggle_flag(event,cell, i, j)
 		rightflag[i][j]=false;
 		cntflag--;
 	}
+	if(board_info.dead==false) alertbomb();
 }
 
 function reveal(cell, i, j)
@@ -188,6 +188,7 @@ function reveal(cell, i, j)
 		cell.style.color=board_info.colors[cntbomb];
 		return;
 	}
+	cell.textContent='';
 	for(var x=-1; x<=1; x++)
    	{
     	for(var y=-1; y<=1; y++)
@@ -238,8 +239,10 @@ function cell_click(cell, i, j)
 		startTimer();
 	}
 	if(board_info.dead) return;
+	if(rightflag[i][j]) return;
 	if(clicked[i][j]) check_next(cell, i, j);
 	else reveal(cell, i, j);
+	if(board_info.dead==false) alertbomb();
 	if(cnt==board_info.cnt_row*board_info.cnt_col-board_info.cnt_bomb) toggleEndGame();
 }
 
@@ -271,12 +274,9 @@ function toggleEndGame()
 		{
 			if(clicked[i][j]) continue;
 			let cell=document.getElementById(hash(i, j));
-			if(state[i][j]>=0) continue;
-			else
-			{
-				cell.textContent=board_info.bomb;
-				cell.style.backgroundColor = 'red';
-			}
+			if(rightflag[i][j] && !flag[hash(i, j)]) cell.style.backgroundColor='IndianRed';
+			else if(state[i][j]>=0) continue;
+			else cell.textContent=board_info.bomb;
 		}
 	}
 	document.getElementById("EndGame").innerHTML="You lose!";
