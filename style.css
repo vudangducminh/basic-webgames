@@ -78,3 +78,47 @@ header{
     display: inline;
     text-align: center;
 }
+#BoardSudoku table {
+    border-collapse: collapse;
+    display: inline-block;
+    border: 2px solid black;
+}
+
+#BoardSudoku table td {
+    border-collapse: collapse;
+    display: inline-block;
+    border: 2px solid black;
+}
+
+#BoardSudoku table td td{
+    background-color: white;
+    font-size: 150%;
+    font-weight: bold;
+    width: 40px;
+    height: 40px;
+    border: 1px solid black;
+    justify-content: center;
+}
+
+#SudokuSolution table {
+    border-collapse: collapse;
+    font-size: 150%;
+    font-weight: bold;
+    display: inline-block;
+    border: 2px solid black;
+}
+
+#SudokuSolution table td {
+    border-collapse: collapse;
+    font-size: 125%;
+    font-weight: bold;
+    display: inline-block;
+    border: 2px solid black;
+}
+
+#SudokuSolution table td td{
+    background-color: white;
+    width: 40px;
+    height: 40px;
+    border: 1px solid black;
+}

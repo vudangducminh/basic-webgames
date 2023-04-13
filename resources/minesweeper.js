@@ -6,7 +6,7 @@ const boardDefault =
 	cnt_row : 13,
 	cnt_col : 30,
 	cnt_bomb : 80,
-	bomb : '💣',
+	bomb : `<i class="twa twa-bomb"></i>`,
 	flag : '🚩',
 	dead : false,
 	opening: true,
@@ -176,7 +176,7 @@ function reveal(cell, i, j)
 	{
 		cell.style.backgroundColor = 'red';
 		board_info.dead=true;
-		cell.textContent=board_info.bomb;
+		cell.innerHTML=board_info.bomb;
 		toggleEndGame();
 		return;
 	}
@@ -261,7 +261,7 @@ function toggleEndGame()
 				if(flag[hash(i, j)]) 
 				{
 					let cell=document.getElementById(hash(i, j));
-					cell.textContent=board_info.flag;
+					cell.innerHTML=board_info.flag;
 				}
 			}
 		}
@@ -276,7 +276,7 @@ function toggleEndGame()
 			let cell=document.getElementById(hash(i, j));
 			if(rightflag[i][j] && !flag[hash(i, j)]) cell.style.backgroundColor='IndianRed';
 			else if(state[i][j]>=0) continue;
-			else cell.textContent=board_info.bomb;
+			else cell.innerHTML=board_info.bomb;
 		}
 	}
 	document.getElementById("EndGame").innerHTML="You lose!";

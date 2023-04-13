@@ -1,0 +1,3 @@
+[submodule "resources/twemoji-awesome"]
+	path = resources/twemoji-awesome
+	url = https://github.com/iamludal/twemoji-awesome
