@@ -7,7 +7,7 @@ const boardDefault =
 	cnt_col : 30,
 	cnt_bomb : 80,
 	bomb : `<i class="twa twa-bomb"></i>`,
-	flag : '🚩',
+	flag : `<i class="twa twa-triangular-flag"></i>`,
 	dead : false,
 	opening: true,
 	timerID: -1,
@@ -45,7 +45,7 @@ function init()
     stopTimer(board_info.timerID);
 	Object.assign(board_info, boardDefault);
 	document.getElementById("EndGame").innerHTML="";
-	document.getElementById("timer").innerHTML = "⏲️: 0";
+	document.getElementById("timer").innerHTML = `<i class="twa twa-timer-clock"></i>: 0`;
 	gameBoard.innerHTML = '';
 	
 
@@ -124,7 +124,7 @@ function init()
 function startTimer(){
 	board_info.timerID = setInterval(function(){
 		gameTime+=1;
-		document.getElementById("timer").innerHTML = "⏲️: " + gameTime;
+		document.getElementById("timer").innerHTML = `<i class="twa twa-timer-clock"></i>: ${gameTime}`;
 	},1000);
 }
 
@@ -144,7 +144,7 @@ function addCellListener(td, i, j)
 
 function alertbomb()
 {
-	document.getElementById("flags").innerHTML="🚩:"+(board_info.cnt_bomb-cntflag);
+	document.getElementById("flags").innerHTML=`<i class="twa twa-triangular-flag"></i>: ${board_info.cnt_bomb-cntflag}`;
 }
 
 function toggle_flag(event,cell, i, j)
@@ -154,7 +154,7 @@ function toggle_flag(event,cell, i, j)
 	if(clicked[i][j]) return;
 	if(rightflag[i][j]==false)
 	{
-		cell.textContent=board_info.flag;
+		cell.innerHTML=board_info.flag;
 		rightflag[i][j]=true;
 		cntflag++;
 	}
