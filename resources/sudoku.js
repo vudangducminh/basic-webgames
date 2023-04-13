@@ -35,10 +35,11 @@ for(var i = 1; i <= board.row; i++){
 
 function reset_all(mode){
     score = 0; 
-    if(mode == 3) mode = rng(0, 2);
-    if(mode == 0) min_hidden_number = 41, max_hidden_number = 44;
-    if(mode == 1) min_hidden_number = 45, max_hidden_number = 49;
-    if(mode == 2) min_hidden_number = 50, max_hidden_number = 54;
+    if(mode == 4) mode = rng(0, 3);
+    if(mode == 0) min_hidden_number = 36, max_hidden_number = 42;
+    if(mode == 1) min_hidden_number = 43, max_hidden_number = 47;
+    if(mode == 2) min_hidden_number = 48, max_hidden_number = 51;
+    if(mode == 3) min_hidden_number = 52, max_hidden_number = 54;
     for(var i = 1; i <= board.row; i++){
         for(var j = 1; j <= board.col; j++){
             state[i][j] = reveal[i][j] = start_board[i][j] = 0;
