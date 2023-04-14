@@ -21,7 +21,7 @@ let state = new Array(board.row + 1);
 let reveal = new Array(board.row + 1);
 let start_board = new Array(board.row + 1);
 let valid = new Array(board.row + 1);
-var score = 0, min_hidden_number, max_hidden_number;
+var score = 0, min_hidden_number, max_hidden_number, cur_mode;
 
 for(var i = 1; i <= board.row; i++){
     state[i] = new Array(board.col + 1).fill(0);
@@ -35,11 +35,12 @@ for(var i = 1; i <= board.row; i++){
 
 function reset_all(mode){
     score = 0; 
-    if(mode == 4) mode = rng(0, 3);
-    if(mode == 0) min_hidden_number = 36, max_hidden_number = 42;
-    if(mode == 1) min_hidden_number = 43, max_hidden_number = 47;
-    if(mode == 2) min_hidden_number = 48, max_hidden_number = 51;
-    if(mode == 3) min_hidden_number = 52, max_hidden_number = 54;
+    if(mode == 5) mode = rng(0, 3);
+    if(mode == 0) min_hidden_number = 36, max_hidden_number = 43; // ~ 10ms
+    if(mode == 1) min_hidden_number = 44, max_hidden_number = 48; // ~ 10ms
+    if(mode == 2) min_hidden_number = 49, max_hidden_number = 52; // ~ 10ms
+    if(mode == 3) min_hidden_number = 53, max_hidden_number = 55; // ~ 2500ms
+    if(mode == 4) min_hidden_number = 56, max_hidden_number = 58; // ~ 5000ms
     for(var i = 1; i <= board.row; i++){
         for(var j = 1; j <= board.col; j++){
             state[i][j] = reveal[i][j] = start_board[i][j] = 0;
@@ -272,17 +273,29 @@ function Reveal_cell(){
         }
     }
     arr = shuffle(arr);
-    var cnt = 0;
+    var cnt = 0, prev_cnt = -1, check = 0;
     for(var i = 0; i < hidden_number; i++){
+        if(cur_mode == 3 || cur_mode == 4){
+            if(i > 150){
+                init(cur_mode);
+                return;
+            }
+            if(cnt == prev_cnt) check++;
+            if(check && cnt < 46){
+                init(cur_mode);
+                return;
+            }
+        }
         let cell = document.getElementById(arr[i]);
         var cell_row = Math.floor((arr[i] - 1) / board.col) + 1, cell_col = arr[i] % board.col;
         if(!cell_col) cell_col = board.col;
+        // console.log(cnt);
+        prev_cnt = cnt;
         var flag = 0;
         for(var num = 1; num <= board.num; num++){
             if(state[cell_row][cell_col] == num) continue;
-            reveal[cell_row][cell_col] = num; 
-            valid = update_state(reveal);
-            if(solve_sudoku(reveal, valid) == true){
+            reveal[cell_row][cell_col] = num;
+            if(solve_sudoku(reveal, update_state(reveal)) == true){
                 flag = 1; break;
             }
         }
@@ -363,6 +376,7 @@ function highlight(row, col){
     }
 }
 function init(mode){
+    cur_mode = mode;
 	gameBoard.innerHTML = '';
 	solBoard.innerHTML = '';
     reset_all(mode);
@@ -430,6 +444,5 @@ function win(){
 }
 
 
-window.addEventListener('load', function(){
-    init(3); 
+window.addEventListener('load', function(){ 
 });
